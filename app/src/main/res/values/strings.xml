@@ -1,3 +1,18 @@
 <resources>
     <string name="app_name">BlackjackSimulator</string>
+    <string name="dealer_hand">Dealer Hand</string>
+    <string name="player_hand">Player Hand</string>
+    <string name="hit">Hit</string>
+    <string name="stand">Stand</string>
+    <string name="game_state">Game State</string>
+    <string name="new_game">New Game</string>
+    <string name="split">SPLIT</string>
+    <string name="dd">DOUBLE DOWN</string>
+    <string name="title_activity_new_game">NewGameActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="start_new_game">Start New Game?</string>
+    <string name="player_score_0">Player Score: 0</string>
+    <string name="dealer_score_0">Dealer Score: 0</string>
+    <string name="ace">Click to make Ace value 11</string>
 </resources>

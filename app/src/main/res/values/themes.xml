@@ -2,4 +2,17 @@
 <resources>
 
     <style name="Theme.BlackjackSimulator" parent="Theme.AppCompat.Light.DarkActionBar" />
+
+    <style name="Theme.BlackjackSimulator.Fullscreen" parent="Theme.BlackjackSimulator">
+        <item name="android:actionBarStyle">
+            @style/Widget.Theme.BlackjackSimulator.ActionBar.Fullscreen
+        </item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:windowBackground">@null</item>
+    </style>
+
+    <style name="ThemeOverlay.BlackjackSimulator.FullscreenContainer" parent="">
+        <item name="fullscreenBackgroundColor">@color/light_blue_600</item>
+        <item name="fullscreenTextColor">@color/light_blue_A200</item>
+    </style>
 </resources>
