@@ -2,31 +2,22 @@ package com.example.blackjacksimulator
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.app.Dialog
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Handler
+import android.util.Log
+import android.view.View
 import android.widget.Button
-import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.room.Room
 import com.example.blackjacksimulator.models.Blackjack
 import com.example.blackjacksimulator.models.BlackjackMove
 import com.example.blackjacksimulator.models.Card
-
-
-/*
-TODO: Add play again button
-TODO: Add betting, splitting, and double downing
-
-TODO: Add a way to track the player's win/loss record
-TODO: Add a way to track the player's money
-TODO: Add a way to track the player's bet
-
-TODO: Implement basic strategy engine
-TODO: Implement basic strategy hints
-
-
- */
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private lateinit var blackjack: Blackjack
@@ -44,8 +35,21 @@ class MainActivity : AppCompatActivity() {
     private lateinit var doubleProbabilityView: TextView
     private lateinit var splitProbabilityView: TextView
 
-    private lateinit var playerScoreView: TextView
-    private lateinit var dealerScoreView: TextView
+    //Image Views
+    private lateinit var dealerCard1View: ImageView
+    private lateinit var dealerCard2View: ImageView
+    private lateinit var dealerCard3View: ImageView
+    private lateinit var dealerCard4View: ImageView
+    private lateinit var dealerCard5View: ImageView
+
+    private lateinit var playerCard1View: ImageView
+    private lateinit var playerCard2View: ImageView
+    private lateinit var playerCard3View: ImageView
+    private lateinit var playerCard4View: ImageView
+    private lateinit var playerCard5View: ImageView
+
+    private lateinit var dealerCardViews: List<ImageView>
+    private lateinit var playerCardViews: List<ImageView>
 
     private enum class GameState {
         INITIAL,
@@ -85,25 +89,71 @@ class MainActivity : AppCompatActivity() {
         doubleProbabilityView = findViewById(R.id.doubleProbabilityView)
         splitProbabilityView = findViewById(R.id.splitProbabilityView)
 
+        //Image views
+        dealerCard1View = findViewById(R.id.dealerCard1View)
+        dealerCard2View = findViewById(R.id.dealerCard2View)
+        dealerCard3View = findViewById(R.id.dealerCard3View)
+        dealerCard4View = findViewById(R.id.dealerCard4View)
+        dealerCard5View = findViewById(R.id.dealerCard5View)
+
+        //create list of dealer card views
+        dealerCardViews = listOf(
+            dealerCard1View,
+            dealerCard2View,
+            dealerCard3View,
+            dealerCard4View,
+            dealerCard5View
+        )
+
+
+        playerCard1View = findViewById(R.id.playerCard1View)
+        playerCard2View = findViewById(R.id.playerCard2View)
+        playerCard3View = findViewById(R.id.playerCard3View)
+        playerCard4View = findViewById(R.id.playerCard4View)
+        playerCard5View = findViewById(R.id.playerCard5View)
+
+
+        //create list of player card views
+        playerCardViews = listOf(
+            playerCard1View,
+            playerCard2View,
+            playerCard3View,
+            playerCard4View,
+            playerCard5View
+        )
+
+        //Initialize the database
+
+
         // Set up button listeners to handle user input
         hitButton.setOnClickListener {
             blackjack.playerHit()
+            Log.d("Hit", "Hit button pressed")
             updateUI()
         }
 
         standButton.setOnClickListener {
             blackjack.playerStand()
+            Log.d("Stand", "Stand button pressed")
             updateUI()
         }
 
+        doubleDownButton.setOnClickListener {
+            blackjack.doubleDown()
+            Log.d("Double", "Double button pressed")
+            updateUI()
+        }
+        splitButton.setOnClickListener {
+            Log.d("Split", "Split button pressed")
+            updateUI()
+        }
 
     }
-
-    fun getCardDrawableId(card: Card): Int {
+    private fun getCardDrawableId(card: Card): Int {
         val suit = card.suit.toString()
         val rank = card.rank.toString()
-
-        return when ("$rank of $suit") {
+        Log.d("Card", "$rank OF $suit")
+        return when ("$rank OF $suit") {
             "ACE OF HEARTS" -> R.drawable.ace_of_hearts
             "TWO OF HEARTS" -> R.drawable.two_of_hearts
             "THREE OF HEARTS" -> R.drawable.three_of_hearts
@@ -159,11 +209,48 @@ class MainActivity : AppCompatActivity() {
             else -> R.drawable.cardbackpng
         }
     }
+    private fun updateCardDisplays() {
+        // Update the dealer's cards
+        for ((index, card) in blackjack.dealerHand().handIterator().withIndex()) {
+            dealerCardViews[index].setImageResource(getCardDrawableId(card))
+            dealerCardViews[index].visibility = ImageView.VISIBLE
+        }
+        // Update the player's cards
+        for ((index, card) in blackjack.playerHand().handIterator().withIndex()) {
+            playerCardViews[index].setImageResource(getCardDrawableId(card))
+            playerCardViews[index].visibility = ImageView.VISIBLE
+        }
+    }
 
+    private fun resetCardDisplays() {
+        val cardBackDrawableId = R.drawable.cardbackpng
 
+        // Reset the dealer's cards
+        for (cardView in dealerCardViews) {
 
+            cardView.setImageResource(cardBackDrawableId)
+            cardView.visibility = ImageView.INVISIBLE
+        }
+        // Reset player cards
+        for (cardView in playerCardViews) {
+            cardView.setImageResource(cardBackDrawableId)
+            cardView.visibility = ImageView.INVISIBLE
+        }
 
-//TODO: Fix bug where user cant start a new game if they get a blackjack
+    }
+
+    private fun startNewGame() {
+        // Reset the game state
+        gameState = GameState.INITIAL
+        blackjack.startNewGame()
+        resetButtonColors()
+
+        // Reset the card displays
+        resetCardDisplays()
+
+        // Reset the UI
+        updateUI()
+    }
     private fun populateProbabilityViews() {
     resetButtonColors()
 
@@ -207,7 +294,6 @@ class MainActivity : AppCompatActivity() {
             BlackjackMove.SPLIT -> {}
         }
     }
-
     @SuppressLint("SetTextI18n")
     private fun showNewGameDialog() {
         // Inflate the custom layout
@@ -221,7 +307,6 @@ class MainActivity : AppCompatActivity() {
         // Find the views in the custom layout
         val playerScoreView = dialogView.findViewById<TextView>(R.id.playerScoreView)
         val dealerScoreView = dialogView.findViewById<TextView>(R.id.dealerScoreView)
-
 
         // Set the scores in the dialog
         if(blackjack.gameState() != Blackjack.GameState.INITIAL.toString()){
@@ -244,7 +329,7 @@ class MainActivity : AppCompatActivity() {
         val startNewGameButton = dialogView.findViewById<Button>(R.id.startNewGameButton)
         startNewGameButton.setOnClickListener {
             // Logic to start a new game
-            blackjack.startNewGame()
+            startNewGame()
             updateUI()
             dialog.dismiss() // Close the dialog
         }
@@ -259,6 +344,7 @@ class MainActivity : AppCompatActivity() {
     // Create a function to update the UI based on the current game state
     @SuppressLint("SetTextI18n")
     private fun updateUI() {
+        updateCardDisplays()
         //Give the current count of the player's hand
         playerHandView.text = "Player Hand: ${blackjack.playerHand().value().toString()}"
         dealerHandView.text = "Dealer Hand: ${blackjack.dealerHand().value().toString()}"
@@ -284,7 +370,5 @@ class MainActivity : AppCompatActivity() {
             blackjack.gameState() == Blackjack.GameState.PLAYER_BLACKJACK.toString()){
             showNewGameDialog()
         }
-
-
     }
 }

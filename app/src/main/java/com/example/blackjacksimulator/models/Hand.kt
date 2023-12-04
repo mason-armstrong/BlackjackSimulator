@@ -4,13 +4,24 @@ class Hand {
     private val cards = mutableListOf<Card>()
     var useSoftAce = true
 
+
+
+    fun split(): Pair<Hand, Hand>{
+        val hand1 = Hand().apply { add(cards[0]) }
+        val hand2 = Hand().apply { add(cards[1]) }
+        return Pair(hand1, hand2)
+
+    }
     fun toggleAce(){
         useSoftAce = !useSoftAce
     }
 
+
     fun add(card: Card) {
         cards.add(card)
     }
+
+    fun handIterator(): Iterator<Card> = cards.iterator()
 
     fun value(): Int{
         var totalValue = cards.sumOf { it.value()}
@@ -44,18 +55,6 @@ class Hand {
         return false
     }
 
-    fun isSoft(): Boolean{
-        if(containsAce() && value() <= 11){
-            return true
-        }
-        return false
-    }
-    fun isHard(): Boolean{
-        if(containsAce() && value() > 11){
-            return true
-        }
-        return false
-    }
 
 
     fun size(): Int = cards.size

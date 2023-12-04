@@ -24,14 +24,14 @@ enum class Rank {
     KING
 }
 
-class Card(val suit: Suit, val rank: Rank) {
+class Card(val suit: Suit, var rank: Rank) {
 
     override fun toString(): String {
         return "$rank of $suit"
     }
     fun value(): Int {
         return when (rank) {
-            Rank.ACE -> 1  // Assume the lowest value for Ace here, the Hand class will account for 11.
+            Rank.ACE -> 1
             Rank.TWO -> 2
             Rank.THREE -> 3
             Rank.FOUR -> 4

@@ -7,6 +7,57 @@ enum class BlackjackMove {
     DOUBLE,
     SPLIT
 }
+
+/**
+ * This class represents the strategy table for blackjack. It is a map of a pair of the player's hand value and the
+ * dealer's upcard value to the move the player should make.
+ */
+/*
+Probability of winning with a given hand value against a dealer's upcard:
+* 21: 100%
+* 20: 92%
+* 19: 85%
+* 18: 77%
+* 17: 69%
+* 16: 62%
+* 15: 58%
+* 14: 56%
+* 13: 39%
+* 12: 31%
+* 11: 0%
+*
+* Probability of player busting based on dealer's upcard:
+* 2: 35%
+* 3: 37%
+* 4: 40%
+* 5: 42%
+* 6: 42%
+* 7: 26%
+* 8: 24%
+* 9: 23%
+* 10: 23%
+* A: 11%
+*
+* Dealers chance of busting when standing on 17:
+* 2: 35%
+* 3: 37%
+* 4: 40%
+* 5: 42%
+* 6: 42%
+* 7: 26%
+* 8: 24%
+* 9: 23%
+* 10: 23%
+* A: 11%
+*
+* Odds of being dealt:
+* 21: 4.8%
+* Standing Hand (17-20): 30.7%
+* Decision Hand (1-16): 38.7%
+* Bust Hand (22+): 25.8%
+*
+*
+ */
 class BlackjackStrategyTable {
     private val strategyTable: Map<Pair<Int, Int>, BlackjackMove> = mapOf(
         // Pair(Hand Value, Dealer Up Card) -> Move
