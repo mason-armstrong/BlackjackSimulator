@@ -15,7 +15,13 @@ class Deck {
 
     fun draw(): Card {
         if (cards.isEmpty()) {
-            throw IllegalStateException("No cards left in the deck.")
+            //Return a new deck if the current deck is empty
+            for (suit in Suit.values()) {
+                for (rank in Rank.values()) {
+                    cards.add(Card(suit, rank))
+                }
+            }
+            cards.shuffle()
         }
         return cards.removeAt(0)
     }
@@ -30,5 +36,13 @@ class Deck {
             hand.add(draw())
         }
         return hand
+    }
+
+    fun cardsRemaining(): Int {
+        return cards.size
+    }
+
+    fun get(i: Int): Card {
+        return cards[i]
     }
 }
